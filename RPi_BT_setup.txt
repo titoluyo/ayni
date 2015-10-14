@@ -1,0 +1,56 @@
+lsusb
+
+#recommended update database
+sudo apt-get update
+sudo apt-get upgrade
+
+#install drivers and utils
+sudo apt-get install bluetooth bluez-utils blueman bluez python-gobject python-gobject-2
+
+#Disable bluetooth pnat support as there seems to be a bug which stops proper operation with pnat enabled. Full details can be found here: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=690749
+#A workaround is to add the following to /etc/bluetooth/main.conf:
+A workaround is to add the following to /etc/bluetooth/main.conf:
+
+#check service status
+sudo service bluetooth status
+
+#scan for devices
+hcitool scan
+
+#ping
+sudo l2ping -c 1 68:69:7C:31:9A:75
+
+#pair with arduino with BT
+#http://www.uugear.com/portfolio/bluetooth-communication-between-raspberry-pi-and-arduino/
+
+#get device name
+hciconfig
+
+##no usar: solo referencial
+#BT RPi discoverable
+sudo hciconfig hci0 piscan
+sdptool add sp #add serial port service
+sudo rfcomm listen hci0& #waiting for connection on channel 1 (& is for get terminal back0)
+cat /dev/rfcomm0 #se pone a leer lo que llgue por BT
+#App: BlueTerm
+
+
+
+#replace # with device name (previous step) and xx:... with scanned remote device
+sudo bluez-simple-agent hci# xx:xx:xx:xx:xx:xx
+
+#add protocol to emulate serial connection
+sudo nano /etc/bluetooth/rfcomm.conf
+
+rfcomm1 {
+    bind yes;
+    device xx:xx:xx:xx:xx:xx;
+    channel 1;
+    comment "Connection to Bluetooth serial module";
+}
+
+#the device "/dev/rfcomm1" will appear
+sudo rfcomm bind all
+
+
+sudo apt-get install python-serial

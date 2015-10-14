@@ -1,33 +1,10 @@
-/*
-  Software serial multple serial test
-
- Receives from the hardware serial, sends to software serial.
- Receives from software serial, sends to hardware serial.
-
- The circuit:
- * RX is digital pin 10 (connect to TX of other device)
- * TX is digital pin 11 (connect to RX of other device)
-
- Note:
- Not all pins on the Mega and Mega 2560 support change interrupts,
- so only the following can be used for RX:
- 10, 11, 12, 13, 50, 51, 52, 53, 62, 63, 64, 65, 66, 67, 68, 69
-
- Not all pins on the Leonardo support change interrupts,
- so only the following can be used for RX:
- 8, 9, 10, 11, 14 (MISO), 15 (SCK), 16 (MOSI).
-
- created back in the mists of time
- modified 25 May 2012
- by Tom Igoe
- based on Mikal Hart's example
-
- This example code is in the public domain.
-
- */
 #include <SoftwareSerial.h>
+#include "Pir.h"
 
 SoftwareSerial mySerial(2, 3); // RX, TX
+String command;
+Pir pir1(8);
+int pir1Val = LOW;
 
 void setup()
 {
@@ -38,36 +15,61 @@ void setup()
   }
 
 
-  Serial.println("Goodnight moon!");
+  Serial.println("Iniciando comunicaciones!");
 
-  // set the data rate for the SoftwareSerial port
+  pir1.setup();
+
   mySerial.begin(9600);
-  mySerial.println("Hello, world?");
+  mySerial.println("Inicio\r\n");
 }
 
-//String cadenaInput;
-void loop() // run over and over
+
+char cad;
+void loop()
 {
-  char cad;
-  byte cadb;
+
+  // Sensar valores
+  pir1Val = pir1.sense();
+
+  // Responder a comandos enviados
   if (mySerial.available()){
     cad = mySerial.read();
-    cadb = cad;
-    //Serial.write(cad);
-    Serial.print(cad);
-    Serial.print("|");
-    Serial.println(cadb);
-    if (cadb == 10) {
-      sendData();
+    if (cad != 10 && cad != 13) {
+        command += cad;
     }
-    //Serial.write(mySerial.read());
+    if (cad == 10) {
+      executeCommand(command); // ejecuta el comando
+      command = "";  // limpia el comando
+    }
   }
+  /*
   if (Serial.available()){
     mySerial.write(Serial.read());
   }
+  */
 }
 
+void executeCommand(String command){
+  //TODO: Hacer una lista de decisiones dependiendo del comando
+  Serial.println(command);
+  if (true) { // reemplazar por un comando valido
+    sendData();
+  }
+}
+
+String p;
+char pc[5];
 void sendData(){
-  mySerial.write("T12.9|H87|RA1\r\n");
+
+  mySerial.write("ID1"); // ID del nodo
+  mySerial.write("|T12.9|H87");
+  mySerial.write("|P");
+  p = String(pir1Val);
+  p.toCharArray(pc,5);
+  mySerial.write(pc);
+  mySerial.write("|RA");
+  mySerial.write("1");
+  mySerial.write("\r\n");
+
 }
 
