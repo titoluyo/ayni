@@ -10,11 +10,11 @@ bluetoothSerial = serial.Serial("/dev/rfcomm1", baudrate=9600)
 command = "SN"; #send data
 count = 1;
 
-while True:
-	print "C " + str(count) + ":"
-	bluetoothSerial.write(command + str(count) + ending)
-	response = bluetoothSerial.readline()
-	print response
+#while True:
+print "C " + str(count) + ":"
+bluetoothSerial.write(str(command) + ending)
+response = bluetoothSerial.readline()
+prin response
 	count = count + 1
 #sleep(1);
 
