@@ -1,8 +1,13 @@
+/*
+Sensor HC-SR501
+Sensor de presencia (PIR)
+*/
 #include "Arduino.h"
 #include "Pir.h"
 
-Pir::Pir(int pin) {
-  _pin = pin;
+Pir::Pir(int pin) : Sensor(pin) {
+  _cantidadValores = CANTIDAD_VALORES;
+  _title[0] = "P";
   _ledPin = 13;  
 }
 
@@ -12,13 +17,16 @@ void Pir::setup() {
   _pirState = LOW;
 }
 
-bool Pir::sense() {
+void Pir::sense() {
+  _currentMillis = millis();
+  sense2();
+}
+
+void Pir::sense2() {
   
-  unsigned long currentMillis = millis();
-  unsigned long diff = currentMillis - _previousMillis;  
-  
-  _val = digitalRead(_pin);  // read input value
-  if (_val == HIGH) {            // check if the input is HIGH
+  _valor = digitalRead(_pin);  // read input value
+  _val[0] = _valor;
+  if (_valor == HIGH) {            // check if the input is HIGH
     digitalWrite(_ledPin, HIGH);  // turn LED ON
     if (_pirState == LOW) {
       // we have just turned on
@@ -35,11 +43,16 @@ bool Pir::sense() {
       _pirState = LOW;
     }
   }
-
-  return _val;
-  
 }
 
+// Obtener el valor actual del sensor
+char* Pir::getValue(int index) 
+{
+  s = String(_val[index],2);
+  s = "|" + _title[index] + ":" + s;
+  s.toCharArray(c,sizeof(c));
+  return c;
+}
 
 
 
