@@ -2,6 +2,7 @@
 #define HCSR04_h
 
 #include "Sensor.h"
+#include <NewPing.h>
 
 #define CANTIDAD_VALORES 1
 
@@ -19,6 +20,11 @@ class HCSR04 : public Sensor
     long _duration;
     float _val[CANTIDAD_VALORES];
     String _title[CANTIDAD_VALORES];
+    NewPing* _sonar;
+
+    float _valAux;
+    typedef void(HCSR04::*func)();
+
 };
 
 #endif

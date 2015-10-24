@@ -30,15 +30,15 @@ void Pir::sense2() {
     digitalWrite(_ledPin, HIGH);  // turn LED ON
     if (_pirState == LOW) {
       // we have just turned on
-      //Serial.println("Motion detected!");
+      Serial.println("Motion detected!");
       // We only want to print on the output change, not state
-      _pirState = LOW;
+      _pirState = HIGH;
     }
   } else {
     digitalWrite(_ledPin, LOW); // turn LED OFF
     if (_pirState == HIGH){
       // we have just turned off
-      //Serial.println("Motion ended!");
+      Serial.println("Motion ended!");
       // We only want to print on the output change, not state
       _pirState = LOW;
     }
@@ -49,9 +49,12 @@ void Pir::sense2() {
 char* Pir::getValue(int index) 
 {
   s = String(_val[index],2);
+	return getValue2(_title[index]);
+	/*
   s = "|" + _title[index] + ":" + s;
   s.toCharArray(c,sizeof(c));
   return c;
+	*/
 }
 
 

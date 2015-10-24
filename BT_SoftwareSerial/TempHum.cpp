@@ -53,9 +53,12 @@ void TempHum::sense2(){
 char* TempHum::getValue(int index) 
 {
   s = String(_val[index],2);
+  return getValue2(_title[index]);
+  /*
   s = "|" + _title[index] + ":" + s;
   s.toCharArray(c,sizeof(c));
   return c;
+  */
 }
 
 

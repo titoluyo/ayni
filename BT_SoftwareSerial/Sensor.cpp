@@ -23,6 +23,13 @@ void Sensor::sense2() {}
 // Obtener el valor actual del sensor
 char* Sensor::getValue(int index) {}
 
+// Obtener el valor actual del sensor
+char* Sensor::getValue2(String title) {
+  s = "|" + title + ":" + s;
+  s.toCharArray(c,sizeof(c));
+  return c;
+}
+
 // Obtener la cantidad de valores obtenidos del sensor
 int Sensor::getCantidadValores() {
   return _cantidadValores;

@@ -12,8 +12,9 @@ class Sensor
     inline virtual void setup();
     inline virtual void sense();
     inline virtual void sense2();
-    inline virtual char* getValue(int index);
     inline virtual int getCantidadValores();
+    inline virtual char* getValue(int index);
+    inline virtual char* getValue2(String title);		
 
   protected:
     unsigned long _previousMillis;
@@ -23,7 +24,7 @@ class Sensor
     int _pin;  // Pin1 for sensor
     int _pin2; // Pin2 for sensor
     int _ledPin;
-    int _interval; // Cada cuanto tiempo se va a sensar
+    unsigned int _interval; // Cada cuanto tiempo se va a sensar
     String s;
     char c[10];
     
