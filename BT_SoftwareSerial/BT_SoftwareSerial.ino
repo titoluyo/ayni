@@ -59,24 +59,26 @@ $ Comando SETUP
 */
 
 void sendData() {
-
+  // Send ID
   mySerial.write("ID1"); // ID del nodo
-
+  // Send data sensors
   for (int i = 0; i < cantSensors; i++) {
     int cantVals = sensor[i]->getCantidadValores();
     for (int j = 0; j < cantVals; j++) {
+      Serial.print("Sensor:");
+      Serial.print(i);
+      Serial.print(",Valor:");
+      Serial.println(j);
       mySerial.write(sensor[i]->getValue(j));
     }
   }
-
-  //Estado relay
+  // Send actuators status
   mySerial.write("|RA1");
+  // Send free memory
+  mySerial.print("|RAM=");
+  mySerial.print(freeMemory());
+  // Send ending  
   mySerial.write("\r\n");
-
-  //  Serial.print("|");
-  //  Serial.print("freeMemory()=");
-  //  Serial.print(freeMemory());
-  //  Serial.println();
 }
 
 
@@ -159,6 +161,12 @@ void processInput(int n) {
           Serial.print("Modo setup");
           break;
         case 62: // '>' Send
+          if (mode == 0) { // Se pide mandar data antes de setup
+            Serial.print("Enviando SEND, pero en modo SETUP, enviar command SETUP)");
+            mySerial.print("S\r\n");
+            delay(100);
+            return;
+          }
           mode = 1;
           Serial.print("Modo send");
           sendData();
@@ -213,15 +221,12 @@ int n;
 void loop()
 {
   // Sensar valores
-  
   if (mode != 0) {
     for (int i = 0; i < cantSensors; i++) {
       sensor[i]->sense();
     }
   }
-  
 
-  //receiveData();
   if (mySerial.available()) {
     cad = mySerial.read();
     n = (int)cad;

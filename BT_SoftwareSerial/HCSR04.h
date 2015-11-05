@@ -18,7 +18,7 @@ class HCSR04 : public Sensor
 
   private:
     long _duration;
-    float _val[CANTIDAD_VALORES];
+    float _val[CANTIDAD_VALORES] = {0};
     String _title[CANTIDAD_VALORES];
     NewPing* _sonar;
 
