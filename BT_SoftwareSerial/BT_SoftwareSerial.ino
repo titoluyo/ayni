@@ -6,6 +6,9 @@
 #include <NewPing.h>
 #include "HCSR04.h"
 #include <MemoryFree.h>
+#include "Regla.h"
+
+
 
 SoftwareSerial mySerial(2, 3); // RX, TX
 uint8_t mode = 0; // 0: Setup; 1: Send data
@@ -14,7 +17,7 @@ char cad;
 
 //#define CANT_TIPOS_SENSORES 4
 #define MAX_SENSORES 10
-uint8_t cantSensors = 3;  // Cantidad de sensores a usar (TODO: SE MANDARA DESDE EL RASPBERRY PI)
+uint8_t cantSensors = 0;  // Cantidad de sensores a usar (TODO: SE MANDARA DESDE EL RASPBERRY PI)
 Sensor* sensor[MAX_SENSORES];  // Lista de sensores
 
 uint8_t numParametrosSensor[] = {
@@ -26,37 +29,43 @@ uint8_t numParametrosSensor[] = {
 
 uint8_t fase = 0;
 /*1
- 0 libre / inicio
- 1 inicio / comando
+  0 libre / inicio
+  1 inicio / comando
    (setup)
- 2 / tipo de sensor
- 3 / parametro
- */
+  2 / tipo de sensor
+  3 / parametro
+*/
 uint8_t tipoSensor = 0;
 int parametro[10];
 int actualParametro = 0;
 
 /*
- Tipos de sensores:
- 0: No definido
- 1: Pir
- 2: TempHum
- 3: HCSR04
- */
+  Tipos de sensores:
+  0: No definido
+  1: Pir
+  2: TempHum
+  3: HCSR04
+*/
 
 /* "Cabecera"
-@ Inicio Comunicaciones
-$ Comando SETUP
-3 cantidad de sensores
-1 Tipo de sensor (deduce la cantidad de parametros?)
-8 Parametro
-2 Tipo de sensor
-5 Parametro
-3 Tipo de sensor
-6 Parametro1
-7 Parametro2
-10 Fin Setup
+  @ Inicio Comunicaciones
+  $ Comando SETUP
+  3 cantidad de sensores
+  1 Tipo de sensor (deduce la cantidad de parametros?)
+  8 Parametro
+  2 Tipo de sensor
+  5 Parametro
+  3 Tipo de sensor
+  6 Parametro1
+  7 Parametro2
+  10 Fin Setup
 */
+
+void serialFlush() {
+  while (mySerial.available() > 0) {
+    char t = mySerial.read();
+  }
+}
 
 void sendData() {
   // Send ID
@@ -77,7 +86,7 @@ void sendData() {
   // Send free memory
   mySerial.print("|RAM=");
   mySerial.print(freeMemory());
-  // Send ending  
+  // Send ending
   mySerial.write("\r\n");
 }
 
@@ -92,8 +101,8 @@ void executeCommand(String command) {
 
 void instanciarSensores()
 {
-    switch (tipoSensor)
-    {
+  switch (tipoSensor)
+  {
     case 1: // Pir
       sensor[currentSensor] = new Pir(parametro[0]);
       Serial.print("Pir creado :");
@@ -111,16 +120,16 @@ void instanciarSensores()
       Serial.print(",");
       Serial.println(parametro[1]);
       break;
-    }
-    Serial.print("Sensor:");
-    Serial.print(currentSensor);
-    Serial.println(" creado");
-/*
-    // Ejecucion del setup de los sensores
-    for (int i = 0; i < cantSensors; i++) {
-      sensor[i]->setup();
-    }
-    */
+  }
+  Serial.print("Sensor:");
+  Serial.print(currentSensor);
+  Serial.println(" creado");
+  /*
+      // Ejecucion del setup de los sensores
+      for (int i = 0; i < cantSensors; i++) {
+        sensor[i]->setup();
+      }
+  */
 }
 
 
@@ -135,18 +144,18 @@ void setup()
 
 
 void processInput(int n) {
-/*
-  Serial.println();
-  Serial.println();
-  Serial.println((int)c);
-  Serial.println();
-*/
+  /*
+    Serial.println();
+    Serial.println();
+    Serial.println((int)c);
+    Serial.println();
+  */
   Serial.print("fase:");
   Serial.print(fase);
   Serial.print("-");
   switch (fase) {
     case 0: // Inicio
-      if(n != 64){
+      if (n != 64) {
         Serial.print("Error inicio debe ser @(64)");
         Serial.print(n);
       }
@@ -163,8 +172,9 @@ void processInput(int n) {
         case 62: // '>' Send
           if (mode == 0) { // Se pide mandar data antes de setup
             Serial.print("Enviando SEND, pero en modo SETUP, enviar command SETUP)");
+            serialFlush();
             mySerial.print("S\r\n");
-            delay(100);
+            //delay(100);
             return;
           }
           mode = 1;
@@ -202,6 +212,7 @@ void processInput(int n) {
         fase = 2;
         actualParametro = 0;
         currentSensor++;
+        cantSensors++;
         Serial.print("    fase=2,actualParametro=0 ");
       }
       //TODO: terminar, falta determinar cuando termina y luego instanciar el sensor
@@ -241,7 +252,7 @@ void loop()
           sensor[i]->setup();
           Serial.print("Setup:");
           Serial.println(i);
-        }          
+        }
         mode = 1;
         mySerial.write("ok\r\n");
       }
